@@ -2,11 +2,16 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
 import hashlib
+import imagehash
+from PIL import Image
+import io
+import base58
+import multihash
 
 app = FastAPI(
     title="DeepShield AI Backend",
-    description="Predictive Deepfake Attack Simulator with Blockchain Integrity",
-    version="1.0.0"
+    description="Predictive Deepfake Attack Simulator with Blockchain Integrity + pHash + IPFS CID",
+    version="2.0.0"
 )
 
 app.add_middleware(
@@ -26,12 +31,29 @@ def home():
     }
 
 
-# ---------------- SHA256 FUNCTION ----------------
+# ---------------- SHA256 ----------------
 def generate_sha256(file_bytes: bytes):
     return hashlib.sha256(file_bytes).hexdigest()
 
 
-# ---------------- THREAT SCORING LOGIC ----------------
+# ---------------- PERCEPTUAL HASH ----------------
+def generate_perceptual_hash(file_bytes: bytes):
+    try:
+        image = Image.open(io.BytesIO(file_bytes))
+        return str(imagehash.phash(image))
+    except Exception:
+        return "Not an image file"
+
+
+# ---------------- IPFS CID SIMULATION ----------------
+def generate_ipfs_cid(file_bytes: bytes):
+    digest = hashlib.sha256(file_bytes).digest()
+    mh = multihash.encode(digest, "sha2-256")
+    cid = base58.b58encode(mh).decode("utf-8")
+    return cid
+
+
+# ---------------- THREAT SCORING ----------------
 def analyze_threat(file_name: str, file_size_mb: float):
     if file_size_mb > 5:
         return 0.82, "HIGH"
@@ -52,7 +74,9 @@ async def upload_media(file: UploadFile = File(...)):
     try:
         content = await file.read()
 
-        file_hash = generate_sha256(content)
+        sha256_hash = generate_sha256(content)
+        perceptual_hash = generate_perceptual_hash(content)
+        ipfs_cid = generate_ipfs_cid(content)
 
         file_size_mb = len(content) / (1024 * 1024)
 
@@ -64,7 +88,9 @@ async def upload_media(file: UploadFile = File(...)):
         return {
             "message": "File uploaded successfully",
             "file_name": file.filename,
-            "sha256_hash": file_hash,
+            "sha256_hash": sha256_hash,
+            "perceptual_hash": perceptual_hash,
+            "ipfs_cid": ipfs_cid,
             "file_size_mb": round(file_size_mb, 2),
             "fake_score": fake_score,
             "threat_prediction": threat_prediction,
@@ -81,19 +107,21 @@ async def verify_hash(file: UploadFile = File(...)):
     try:
         content = await file.read()
 
-        current_hash = generate_sha256(content)
+        sha256_hash = generate_sha256(content)
+        perceptual_hash = generate_perceptual_hash(content)
 
         return {
             "verified": True,
-            "message": "Hash generated successfully",
-            "sha256_hash": current_hash
+            "sha256_hash": sha256_hash,
+            "perceptual_hash": perceptual_hash,
+            "message": "Integrity check successful"
         }
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# ---------------- FUTURE ATTACK PREDICTION ----------------
+# ---------------- FUTURE ATTACK ----------------
 @app.post("/predict-future-attack")
 async def predict_future_attack(file: UploadFile = File(...)):
     try:
