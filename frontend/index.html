@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeepShield AI Dashboard</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="background-effects">
+        <div class="blob purple-blob"></div>
+        <div class="blob blue-blob"></div>
+        <div class="blob pink-blob"></div>
+    </div>
+
+    <div class="layout">
+        <nav class="sidebar glass-panel">
+            <div class="logo">
+                <i class="fa-solid fa-shield-halved"></i>
+                <h2>DeepShield AI</h2>
+            </div>
+            <ul class="nav-links">
+                <li class="active" data-target="dashboard">
+                    <i class="fa-solid fa-house"></i> Dashboard
+                </li>
+                <li data-target="scanner">
+                    <i class="fa-solid fa-expand"></i> Deepfake Scanner
+                </li>
+                <li data-target="verifier">
+                    <i class="fa-solid fa-link"></i> Integrity Verifier
+                </li>
+                <li data-target="simulator">
+                    <i class="fa-solid fa-bolt"></i> Threat Simulator
+                </li>
+            </ul>
+        </nav>
+
+        <main class="main-content">
+            <header class="glass-panel">
+                <h1 id="page-title">Dashboard Overview</h1>
+                <div class="user-profile">
+                    <div class="avatar"><i class="fa-solid fa-user-astronaut"></i></div>
+                    <span>Administrator</span>
+                </div>
+            </header>
+
+            <div class="content-area">
+                <!-- Dashboard Section -->
+                <section id="dashboard" class="page-section active">
+                    <div class="dashboard-grid">
+                        <div class="stat-card glass-panel">
+                            <h3>Files Scanned</h3>
+                            <div class="stat-value" id="stat-files-scanned">0</div>
+                            <div class="stat-trend"><i class="fa-solid fa-minus"></i> +0%</div>
+                        </div>
+                        <div class="stat-card glass-panel">
+                            <h3>Threats Intercepted</h3>
+                            <div class="stat-value" id="stat-threats-intercepted">0</div>
+                            <div class="stat-trend"><i class="fa-solid fa-minus"></i> -0%</div>
+                        </div>
+                        <div class="stat-card glass-panel">
+                            <h3>Blockchain Verifications</h3>
+                            <div class="stat-value" id="stat-verifications">0</div>
+                            <div class="stat-trend"><i class="fa-solid fa-minus"></i> N/A</div>
+                        </div>
+                    </div>
+                    
+                    <div class="intro-card glass-panel mt-2">
+                        <h2>Welcome to DeepShield AI</h2>
+                        <p>Our predictive deepfake attack simulator utilizes advanced heuristic algorithms combined with blockchain integrity to guarantee the authenticity of your digital media. Navigate using the sidebar to begin analyzing files.</p>
+                    </div>
+                </section>
+
+                <!-- Scanner Section -->
+                <section id="scanner" class="page-section">
+                    <div class="upload-container glass-panel">
+                        <h2>Media Scanner</h2>
+                        <p>Upload a file to detect deepfakes and analyze potential security threats.</p>
+                        
+                        <div class="drop-zone" id="scanner-dropzone">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                            <p>Drag & Drop your media file here</p>
+                            <span>OR</span>
+                            <button class="btn-primary" onclick="document.getElementById('scanner-file').click()">Browse Files</button>
+                            <input type="file" id="scanner-file" hidden>
+                        </div>
+                        
+                        <div class="loading-spinner hidden" id="scanner-loading">
+                            <i class="fa-solid fa-circle-notch fa-spin"></i> Analyzing Media...
+                        </div>
+
+                        <div class="results-panel glass-panel hidden" id="scanner-results">
+                            <h3>Analysis Report</h3>
+                            <div class="result-grid">
+                                <div class="result-item">
+                                    <span class="label">Filename</span>
+                                    <span class="value" id="res-scan-filename">-</span>
+                                </div>
+                                <div class="result-item">
+                                    <span class="label">Size (MB)</span>
+                                    <span class="value" id="res-scan-size">-</span>
+                                </div>
+                                <div class="result-item">
+                                    <span class="label">SHA256 Hash</span>
+                                    <span class="value hash-text" id="res-scan-hash">-</span>
+                                </div>
+                                <div class="result-item">
+                                    <span class="label">Fake Score</span>
+                                    <span class="value score-badge" id="res-scan-score">-</span>
+                                </div>
+                                <div class="result-item full-width">
+                                    <span class="label">Threat Prediction</span>
+                                    <span class="value threat-badge danger" id="res-scan-threat">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Verifier Section -->
+                <section id="verifier" class="page-section">
+                    <div class="upload-container glass-panel">
+                        <h2>Integrity Verifier</h2>
+                        <p>Generate a secure, cryptographic hash representing your file to ensure it remains unaltered.</p>
+                        
+                        <div class="drop-zone" id="verifier-dropzone">
+                            <i class="fa-solid fa-link"></i>
+                            <p>Drag file to verify integrity</p>
+                            <button class="btn-primary" onclick="document.getElementById('verifier-file').click()">Select File</button>
+                            <input type="file" id="verifier-file" hidden>
+                        </div>
+
+                        <div class="loading-spinner hidden" id="verifier-loading">
+                            <i class="fa-solid fa-circle-notch fa-spin"></i> Generating Hash...
+                        </div>
+                        
+                        <div class="results-panel glass-panel hidden" id="verifier-results">
+                            <h3>Verification Log</h3>
+                            <div class="verification-badge success">
+                                <i class="fa-solid fa-shield-check"></i> <span id="res-verify-status">Verified Successfully</span>
+                            </div>
+                            <div class="result-item full-width mt-2">
+                                <span class="label">Generated Hash</span>
+                                <span class="value hash-text" id="res-verify-hash">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Simulator Section -->
+                <section id="simulator" class="page-section">
+                    <div class="upload-container glass-panel">
+                        <h2>Threat Simulator</h2>
+                        <p>Predictive sandbox analysis simulating adversarial evolutionary bypass attacks on media.</p>
+                        
+                        <div class="drop-zone" id="simulator-dropzone">
+                            <i class="fa-solid fa-biohazard"></i>
+                            <p>Upload suspect file for simulation</p>
+                            <button class="btn-primary" onclick="document.getElementById('simulator-file').click()">Initialize Simulation</button>
+                            <input type="file" id="simulator-file" hidden>
+                        </div>
+
+                        <div class="loading-spinner hidden" id="simulator-loading">
+                            <i class="fa-solid fa-circle-notch fa-spin"></i> Running Predictive Simulation...
+                        </div>
+
+                        <div class="results-panel glass-panel hidden" id="simulator-results">
+                            <h3>Simulation Outcomes</h3>
+                            <div class="result-grid">
+                                <div class="result-item">
+                                    <span class="label">Future Attack Risk</span>
+                                    <span class="value score-badge" id="res-sim-risk">-</span>
+                                </div>
+                                <div class="result-item full-width">
+                                    <span class="label">Predicted Attack Type</span>
+                                    <span class="value" id="res-sim-type">-</span>
+                                </div>
+                                <div class="result-item">
+                                    <span class="label">Confidence</span>
+                                    <div class="progress-bar-container">
+                                        <div class="progress-bar" id="res-sim-confidence-bar" style="width: 0%;"></div>
+                                    </div>
+                                    <span class="value" id="res-sim-confidence-text" style="font-size: 0.8rem">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>
