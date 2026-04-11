@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeepShield AI — Deepfake Detection Platform</title>
+    <meta name="description" content="DeepShield AI: Predictive deepfake detection with multi-modal AI fusion, blockchain integrity, and adversarial threat simulation.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Animated particles background -->
+    <canvas id="particles-canvas"></canvas>
+
+    <div class="background-effects">
+        <div class="blob purple-blob"></div>
+        <div class="blob blue-blob"></div>
+        <div class="blob pink-blob"></div>
+    </div>
+
+    <div class="layout">
+        <!-- Sidebar -->
+        <nav class="sidebar glass-panel">
+            <a href="index.html" class="logo" style="text-decoration: none; color: inherit;">
+                <div class="logo-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                <div>
+                    <h2>DeepShield</h2>
+                    <span class="logo-sub">AI Security Platform</span>
+                </div>
+            </a>
+            <ul class="nav-links">
+                <li class="active" data-target="dashboard">
+                    <i class="fa-solid fa-gauge-high"></i>
+                    <span>Dashboard</span>
+                </li>
+                <li data-target="scanner" style="position:relative">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <span>Deepfake Scanner</span>
+                    <span class="nav-pulse-badge"></span>
+                </li>
+                <li data-target="verifier">
+                    <i class="fa-solid fa-link"></i>
+                    <span>Integrity Verifier</span>
+                </li>
+                <li data-target="simulator">
+                    <i class="fa-solid fa-bolt-lightning"></i>
+                    <span>Threat Simulator</span>
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                <div class="system-status">
+                    <span class="status-dot active"></span>
+                    <span>System Online</span>
+                </div>
+                <div class="version-tag">v2.0.0</div>
+            </div>
+        </nav>
+
+        <!-- Main -->
+        <main class="main-content">
+            <header class="glass-panel">
+                <div class="header-left">
+                    <h1 id="page-title" class="gradient-text">Dashboard Overview</h1>
+                    <p id="page-subtitle" class="page-subtitle">Real-time AI threat analysis and blockchain integrity</p>
+                </div>
+                <div class="header-right">
+                    <div class="network-badge glass-panel" id="network-info" style="display:none">
+                        <span class="status-dot active"></span>
+                        <span id="network-name">Ganache Local</span>
+                    </div>
+                    <button id="connect-wallet-btn" class="btn-wallet">
+                        <i class="fa-brands fa-ethereum"></i>
+                        <span>Connect MetaMask</span>
+                    </button>
+                    <div id="wallet-connected" style="display:none" class="wallet-connected glass-panel">
+                        <i class="fa-brands fa-ethereum" style="color: var(--accent-primary)"></i>
+                        <span id="wallet-address"></span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-area">
+                <!-- DASHBOARD -->
+                <section id="dashboard" class="page-section active">
+                    <div class="dashboard-grid">
+                        <div class="stat-card glass-panel clickable-card" id="card-scanned" onclick="openModal('modal-scanned')" title="Click to see details">
+                            <div class="stat-icon"><i class="fa-solid fa-file-shield"></i></div>
+                            <div class="stat-body">
+                                <h3>Files Scanned <i class="fa-solid fa-circle-info" style="font-size:0.7rem;opacity:0.5"></i></h3>
+                                <div class="stat-value" id="stat-files-scanned">0</div>
+                                <div class="stat-trend neutral"><i class="fa-solid fa-minus"></i> Session count</div>
+                            </div>
+                        </div>
+                        <div class="stat-card glass-panel clickable-card" id="card-threats" onclick="openModal('modal-threats')" title="Click to see details">
+                            <div class="stat-icon red"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                            <div class="stat-body">
+                                <h3>Threats Intercepted <i class="fa-solid fa-circle-info" style="font-size:0.7rem;opacity:0.5"></i></h3>
+                                <div class="stat-value" id="stat-threats-intercepted">0</div>
+                                <div class="stat-trend neutral"><i class="fa-solid fa-minus"></i> HIGH + MEDIUM</div>
+                            </div>
+                        </div>
+                        <div class="stat-card glass-panel clickable-card" id="card-chain" onclick="openModal('modal-chain')" title="Click to see details">
+                            <div class="stat-icon green"><i class="fa-solid fa-cubes"></i></div>
+                            <div class="stat-body">
+                                <h3>Blockchain Verifications <i class="fa-solid fa-circle-info" style="font-size:0.7rem;opacity:0.5"></i></h3>
+                                <div class="stat-value" id="stat-verifications">0</div>
+                                <div class="stat-trend neutral"><i class="fa-solid fa-minus"></i> Immutable logs</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="intro-container mt-2">
+                        <div class="intro-card glass-panel">
+                            <div class="intro-badge"><i class="fa-solid fa-brain-circuit"></i> Multi-Modal AI Architecture</div>
+                            <h2 class="gradient-text">Welcome to DeepShield AI</h2>
+                            <p>Our predictive deepfake attack simulator utilizes a 5-module multi-modal ensemble — analyzing <strong>Gaze patterns, Lip Sync coherence, Voice cloning, Emotion spoofing</strong> and <strong>Behavioral signals</strong> — combined with blockchain integrity to guarantee the authenticity of your digital media.</p>
+                            <div class="architecture-pipeline">
+                                <div class="pipeline-step"><i class="fa-solid fa-video"></i><span>Input</span></div>
+                                <i class="fa-solid fa-arrow-right pipeline-arrow"></i>
+                                <div class="pipeline-step"><i class="fa-solid fa-microchip"></i><span>OpenCV</span></div>
+                                <i class="fa-solid fa-arrow-right pipeline-arrow"></i>
+                                <div class="pipeline-step"><i class="fa-solid fa-network-wired"></i><span>5 AI Modules</span></div>
+                                <i class="fa-solid fa-arrow-right pipeline-arrow"></i>
+                                <div class="pipeline-step"><i class="fa-solid fa-scale-balanced"></i><span>Ensemble</span></div>
+                                <i class="fa-solid fa-arrow-right pipeline-arrow"></i>
+                                <div class="pipeline-step verdict-step"><i class="fa-solid fa-flag"></i><span>Verdict</span></div>
+                            </div>
+                        </div>
+                        <div class="cube-container">
+                            <div class="cube">
+                                <div class="face front"><i class="fa-solid fa-shield-halved"></i></div>
+                                <div class="face back"><i class="fa-solid fa-link"></i></div>
+                                <div class="face right"><i class="fa-solid fa-eye"></i></div>
+                                <div class="face left"><i class="fa-solid fa-fingerprint"></i></div>
+                                <div class="face top"><i class="fa-solid fa-brain"></i></div>
+                                <div class="face bottom"><i class="fa-solid fa-lock"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SCANNER -->
+                <section id="scanner" class="page-section">
+                    <div class="upload-container">
+                        <div class="section-header">
+                            <h2 class="gradient-text">Deepfake Media Scanner</h2>
+                            <p>Upload video, image or audio — our 5-module AI ensemble analyzes it through the complete detection pipeline.</p>
+                        </div>
+
+                        <div class="drop-zone glass-panel" id="scanner-dropzone">
+                            <div class="scan-beam" id="scan-beam"></div>
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                            <p>Drag & Drop your media file here</p>
+                            <span>or</span>
+                            <button class="btn-primary" onclick="document.getElementById('scanner-file').click()">
+                                <i class="fa-solid fa-folder-open"></i> Browse Files
+                            </button>
+                            <input type="file" id="scanner-file" hidden>
+                            <div class="accepted-types">
+                                <span>.mp4</span><span>.jpg</span><span>.png</span><span>.wav</span><span>.mp3</span>
+                            </div>
+                        </div>
+
+                        <div class="cyber-loading hidden" id="scanner-loading">
+                            <div class="cyber-spinner"></div>
+                            <div class="loading-text">
+                                <span id="loading-step">Initializing neural pipeline...</span>
+                            </div>
+                        </div>
+
+                        <div class="results-panel glass-panel hidden" id="scanner-results">
+                            <!-- Verdict Banner -->
+                            <div class="verdict-banner" id="verdict-banner">
+                                <div class="verdict-icon" id="verdict-icon"></div>
+                                <div class="verdict-text">
+                                    <div class="verdict-label">Detection Verdict</div>
+                                    <div class="verdict-value" id="res-scan-verdict">-</div>
+                                </div>
+                                <div class="verdict-score">
+                                    <div class="verdict-label">Ensemble Score</div>
+                                    <div class="verdict-score-val" id="res-scan-score">-</div>
+                                </div>
+                                <div class="verdict-threat">
+                                    <div class="verdict-label">Threat Level</div>
+                                    <span class="threat-badge" id="res-scan-threat">-</span>
+                                </div>
+                            </div>
+
+                            <!-- Radar Chart + Module Breakdown -->
+                            <div class="analysis-grid">
+                                <div class="radar-container glass-panel">
+                                    <h4><i class="fa-solid fa-chart-radar"></i> Module Confidence Radar</h4>
+                                    <canvas id="radarChart"></canvas>
+                                </div>
+                                <div class="modules-grid">
+                                    <h4><i class="fa-solid fa-network-wired"></i> Per-Module Breakdown</h4>
+                                    <div class="module-item" id="mod-gaze">
+                                        <div class="module-label"><i class="fa-solid fa-eye"></i> Gaze (CNN/LSTM)</div>
+                                        <div class="module-bar-wrap"><div class="module-bar" id="bar-gaze"></div></div>
+                                        <div class="module-pct" id="res-gaze">-</div>
+                                    </div>
+                                    <div class="module-item" id="mod-lipsync">
+                                        <div class="module-label"><i class="fa-solid fa-lips"></i> Lip Sync</div>
+                                        <div class="module-bar-wrap"><div class="module-bar" id="bar-lipsync"></div></div>
+                                        <div class="module-pct" id="res-lipsync">-</div>
+                                    </div>
+                                    <div class="module-item" id="mod-voice">
+                                        <div class="module-label"><i class="fa-solid fa-microphone"></i> Voice (MFCC)</div>
+                                        <div class="module-bar-wrap"><div class="module-bar" id="bar-voice"></div></div>
+                                        <div class="module-pct" id="res-voice">-</div>
+                                    </div>
+                                    <div class="module-item" id="mod-emotion">
+                                        <div class="module-label"><i class="fa-solid fa-face-meh"></i> Emotion (ResNet)</div>
+                                        <div class="module-bar-wrap"><div class="module-bar" id="bar-emotion"></div></div>
+                                        <div class="module-pct" id="res-emotion">-</div>
+                                    </div>
+                                    <div class="module-item" id="mod-behavioral">
+                                        <div class="module-label"><i class="fa-solid fa-chart-line"></i> Behavioral</div>
+                                        <div class="module-bar-wrap"><div class="module-bar" id="bar-behavioral"></div></div>
+                                        <div class="module-pct" id="res-behavioral">-</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Blockchain Forensics -->
+                            <div class="blockchain-section glass-panel">
+                                <h4><i class="fa-solid fa-cubes"></i> Blockchain Forensic Ledger</h4>
+                                <div class="hash-grid">
+                                    <div class="hash-item">
+                                        <span class="hash-label">File</span>
+                                        <span class="hash-value" id="res-scan-filename">-</span>
+                                    </div>
+                                    <div class="hash-item">
+                                        <span class="hash-label">Size</span>
+                                        <span class="hash-value" id="res-scan-size">-</span> <small>MB</small>
+                                    </div>
+                                    <div class="hash-item full">
+                                        <span class="hash-label"><i class="fa-solid fa-lock"></i> SHA-256</span>
+                                        <span class="hash-value mono" id="res-scan-hash">-</span>
+                                    </div>
+                                    <div class="hash-item full">
+                                        <span class="hash-label"><i class="fa-solid fa-fingerprint"></i> pHash</span>
+                                        <span class="hash-value mono" id="res-scan-phash">-</span>
+                                    </div>
+                                    <div class="hash-item full">
+                                        <span class="hash-label"><i class="fa-solid fa-circle-nodes"></i> IPFS CID</span>
+                                        <span class="hash-value mono" id="res-scan-ipfs">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VERIFIER -->
+                <section id="verifier" class="page-section">
+                    <div class="upload-container">
+                        <div class="section-header">
+                            <h2 class="gradient-text">Blockchain Integrity Verifier</h2>
+                            <p>Generate tamper-proof cryptographic hashes for immutable forensic logging on the blockchain.</p>
+                        </div>
+                        <div class="drop-zone glass-panel" id="verifier-dropzone">
+                            <i class="fa-solid fa-link"></i>
+                            <p>Drop file to generate its forensic hash</p>
+                            <button class="btn-primary" onclick="document.getElementById('verifier-file').click()">
+                                <i class="fa-solid fa-folder-open"></i> Select File
+                            </button>
+                            <input type="file" id="verifier-file" hidden>
+                        </div>
+                        <div class="cyber-loading hidden" id="verifier-loading">
+                            <div class="cyber-spinner"></div>
+                            <div class="loading-text"><span>Generating cryptographic proof...</span></div>
+                        </div>
+                        <div class="results-panel glass-panel hidden" id="verifier-results">
+                            <div class="verification-badge success">
+                                <i class="fa-solid fa-circle-check"></i>
+                                <div>
+                                    <strong>Integrity Verified</strong>
+                                    <span>Blockchain record created</span>
+                                </div>
+                            </div>
+                            <div class="blockchain-section glass-panel" style="margin-top:1rem">
+                                <h4><i class="fa-solid fa-cubes"></i> Cryptographic Proof</h4>
+                                <div class="hash-grid">
+                                    <div class="hash-item full">
+                                        <span class="hash-label"><i class="fa-solid fa-lock"></i> SHA-256 Hash</span>
+                                        <span class="hash-value mono" id="res-verify-hash">-</span>
+                                    </div>
+                                    <div class="hash-item full">
+                                        <span class="hash-label"><i class="fa-solid fa-fingerprint"></i> Perceptual Hash</span>
+                                        <span class="hash-value mono" id="res-verify-phash">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SIMULATOR -->
+                <section id="simulator" class="page-section">
+                    <div class="upload-container">
+                        <div class="section-header">
+                            <h2 class="gradient-text">Adversarial Threat Simulator</h2>
+                            <p>FGSM/PGD attack prediction engine — proactive threat modeling for next-generation adversarial bypass strategies.</p>
+                        </div>
+                        <div class="drop-zone glass-panel" id="simulator-dropzone">
+                            <i class="fa-solid fa-biohazard"></i>
+                            <p>Upload suspect media to initialize simulation</p>
+                            <button class="btn-primary" onclick="document.getElementById('simulator-file').click()">
+                                <i class="fa-solid fa-flask-vial"></i> Initialize Simulation
+                            </button>
+                            <input type="file" id="simulator-file" hidden>
+                        </div>
+                        <div class="cyber-loading hidden" id="simulator-loading">
+                            <div class="cyber-spinner red"></div>
+                            <div class="loading-text"><span>Running adversarial simulation...</span></div>
+                        </div>
+                        <div class="results-panel glass-panel hidden" id="simulator-results">
+                            <div class="sim-outcome glass-panel">
+                                <div class="sim-row">
+                                    <div>
+                                        <div class="verdict-label">Future Attack Risk</div>
+                                        <span class="threat-badge" id="res-sim-risk">-</span>
+                                    </div>
+                                    <div>
+                                        <div class="verdict-label">Predicted Attack Vector</div>
+                                        <strong id="res-sim-type">-</strong>
+                                    </div>
+                                </div>
+                                <div class="verdict-label" style="margin-top:1.5rem">Prediction Confidence</div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" id="res-sim-confidence-bar" style="width: 0%;"></div>
+                                </div>
+                                <span id="res-sim-confidence-text" class="pct-label">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODALS -->
+    <div class="modal-overlay" id="modal-scanned" onclick="closeModal('modal-scanned')">
+        <div class="modal-box glass-panel" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="stat-icon" style="width:44px;height:44px;font-size:1.2rem"><i class="fa-solid fa-file-shield"></i></div>
+                <div>
+                    <h3>Files Scanned</h3>
+                    <p style="color:var(--text-secondary);font-size:0.82rem">All media files processed this session</p>
+                </div>
+                <button class="modal-close" onclick="closeModal('modal-scanned')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-stat">
+                    <span class="modal-stat-label">Total Files This Session</span>
+                    <span class="modal-stat-val" id="modal-scan-count">0</span>
+                </div>
+                <div class="modal-desc">
+                    <i class="fa-solid fa-circle-info"></i>
+                    Each file is processed through the full 5-module AI pipeline — Gaze, Lip Sync, Voice, Emotion and Behavioral analysis — before being assigned a Detection Verdict.
+                </div>
+                <div id="modal-scan-log" class="modal-log"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-threats" onclick="closeModal('modal-threats')">
+        <div class="modal-box glass-panel" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="stat-icon red" style="width:44px;height:44px;font-size:1.2rem"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                <div>
+                    <h3>Threats Intercepted</h3>
+                    <p style="color:var(--text-secondary);font-size:0.82rem">Files flagged as HIGH or MEDIUM threat</p>
+                </div>
+                <button class="modal-close" onclick="closeModal('modal-threats')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-stat">
+                    <span class="modal-stat-label">Threats Intercepted</span>
+                    <span class="modal-stat-val danger" id="modal-threat-count">0</span>
+                </div>
+                <div class="modal-desc">
+                    <i class="fa-solid fa-circle-info"></i>
+                    Files with a fused AI ensemble score above <strong>0.40</strong> are flagged as threats. Score above <strong>0.75</strong> is classified as HIGH severity requiring immediate review.
+                </div>
+                <div id="modal-threat-log" class="modal-log"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-chain" onclick="closeModal('modal-chain')">
+        <div class="modal-box glass-panel" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="stat-icon green" style="width:44px;height:44px;font-size:1.2rem"><i class="fa-solid fa-cubes"></i></div>
+                <div>
+                    <h3>Blockchain Verifications</h3>
+                    <p style="color:var(--text-secondary);font-size:0.82rem">Tamper-proof immutable forensic ledger</p>
+                </div>
+                <button class="modal-close" onclick="closeModal('modal-chain')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-stat">
+                    <span class="modal-stat-label">Hash Records Generated</span>
+                    <span class="modal-stat-val green" id="modal-chain-count">0</span>
+                </div>
+                <div class="modal-desc">
+                    <i class="fa-solid fa-circle-info"></i>
+                    Every scanned or verified file generates a SHA-256 cryptographic hash and an IPFS-compatible CID. These are immutable forensic records suitable for blockchain anchoring via smart contracts.
+                </div>
+                <div id="modal-chain-log" class="modal-log"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
