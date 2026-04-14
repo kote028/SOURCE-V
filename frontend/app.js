@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://127.0.0.1:5000';
+const API_BASE_URL = '';  // Relative URLs — backend serves this frontend
 let radarChart = null;
 let filesScannedCount = 0;
 let threatsInterceptedCount = 0;
@@ -328,7 +328,7 @@ function setupScanner() {
             document.getElementById('res-scan-phash').innerText = data.perceptual_hash || 'N/A';
             document.getElementById('res-scan-ipfs').innerText = data.ipfs_cid || 'N/A';
 
-            updateDashboard(data.threat_prediction);
+            updateDashboard(data.threat_prediction, data.file_name, data.detection_verdict, data.sha256_hash);
 
             dropzone.classList.remove('scanning');
             loading.classList.add('hidden');
@@ -339,7 +339,7 @@ function setupScanner() {
             dropzone.classList.remove('scanning');
             loading.classList.add('hidden');
             console.error(err);
-            alert('Analysis failed. Make sure the backend is running on http://127.0.0.1:5000');
+            alert('Analysis failed. Make sure the backend is running:\n  python main.py\n\nError: ' + err.message);
         }
     });
 }

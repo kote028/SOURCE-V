@@ -156,7 +156,7 @@
                             <i class="fa-solid fa-cloud-arrow-up"></i>
                             <p>Drag & Drop your media file here</p>
                             <span>or</span>
-                            <button class="btn-primary" onclick="document.getElementById('scanner-file').click()">
+                            <button class="btn-primary" id="scanner-browse-btn">
                                 <i class="fa-solid fa-folder-open"></i> Browse Files
                             </button>
                             <input type="file" id="scanner-file" hidden>
@@ -266,7 +266,7 @@
                         <div class="drop-zone glass-panel" id="verifier-dropzone">
                             <i class="fa-solid fa-link"></i>
                             <p>Drop file to generate its forensic hash</p>
-                            <button class="btn-primary" onclick="document.getElementById('verifier-file').click()">
+                            <button class="btn-primary" id="verifier-browse-btn">
                                 <i class="fa-solid fa-folder-open"></i> Select File
                             </button>
                             <input type="file" id="verifier-file" hidden>
@@ -310,7 +310,7 @@
                         <div class="drop-zone glass-panel" id="simulator-dropzone">
                             <i class="fa-solid fa-biohazard"></i>
                             <p>Upload suspect media to initialize simulation</p>
-                            <button class="btn-primary" onclick="document.getElementById('simulator-file').click()">
+                            <button class="btn-primary" id="simulator-browse-btn">
                                 <i class="fa-solid fa-flask-vial"></i> Initialize Simulation
                             </button>
                             <input type="file" id="simulator-file" hidden>
@@ -417,6 +417,29 @@
         </div>
     </div>
 
-    <script src="app.js"></script>
+   
+
+  <!-- ========================= -->
+<!-- ✅ FINAL CLEAN SCRIPTS -->
+<!-- ========================= -->
+
+<!-- FINAL CLEAN SCRIPTS -->
+
+<script>
+function openModal(id) {
+    const modal = document.getElementById(id);
+    if (modal) modal.style.display = "flex";
+}
+
+function closeModal(id) {
+    const modal = document.getElementById(id);
+    if (modal) modal.style.display = "none";
+}
+</script>
+
+<script src="app.js"></script>
+
+</body>
+</html>
 </body>
 </html>

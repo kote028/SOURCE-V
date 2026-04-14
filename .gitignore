@@ -1,0 +1,30 @@
+# Virtual environments
+venv/
+env/
+.env
+
+# Python Cache
+__pycache__/
+*.pyc
+
+# IDEs
+.vscode/
+.idea/
+
+# Large Datasets
+FF++/
+data/
+archive/
+archive (1)/
+emotional_data.py/
+val/
+
+# Uploads directory
+uploads/*
+!uploads/.gitkeep
+
+# Models (Optionally ignore if too large, but right now ~25MB so it's okay, maybe ignore if you don't want to push models)
+# models/
+
+# Weird empty or broken dirs
+✅/

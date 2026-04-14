@@ -200,7 +200,7 @@ header {
     border-radius: 20px; padding: 4rem 2rem;
     text-align: center; transition: all 0.3s ease; cursor: pointer; margin-bottom: 1.5rem;
 }
-.drop-zone:hover, .drop-zone.dragover { border-color: var(--accent-primary); background: rgba(139,92,246,0.05); }
+.drop-zone:hover, .drop-zone.dragover, .drop-zone.hover { border-color: var(--accent-primary); background: rgba(139,92,246,0.05); }
 .drop-zone > i { font-size: 3rem; color: var(--accent-primary); margin-bottom: 1rem; display: block; filter: drop-shadow(0 0 12px var(--accent-glow)); }
 .drop-zone > p { color: var(--text-secondary); margin-bottom: 0.5rem; font-size: 1.05rem; }
 .drop-zone > span { display: block; color: var(--text-secondary); font-size: 0.8rem; margin: 0.75rem 0; opacity: 0.6; }
@@ -260,10 +260,21 @@ header {
 .verdict-score-val { font-size: 1.8rem; font-weight: 700; font-family: 'Outfit', sans-serif; }
 
 /* Threat Badge */
-.threat-badge { display: inline-block; padding: 6px 14px; border-radius: 8px; font-weight: 700; font-size: 0.9rem; }
-.threat-badge.HIGH { background: rgba(239,68,68,0.15); color: var(--danger); border: 1px solid rgba(239,68,68,0.3); }
-.threat-badge.MEDIUM { background: rgba(245,158,11,0.15); color: var(--warning); border: 1px solid rgba(245,158,11,0.3); }
-.threat-badge.LOW { background: rgba(16,185,129,0.15); color: var(--success); border: 1px solid rgba(16,185,129,0.3); }
+.threat-badge { display: inline-block; padding: 6px 14px; border-radius: 8px; font-weight: 700; font-size: 0.9rem; border: 1px solid transparent; }
+.threat-badge.high, .threat-badge.HIGH { background: rgba(239,68,68,0.15); color: var(--danger); border-color: rgba(239,68,68,0.3); }
+.threat-badge.medium, .threat-badge.MEDIUM { background: rgba(245,158,11,0.15); color: var(--warning); border-color: rgba(245,158,11,0.3); }
+.threat-badge.low, .threat-badge.LOW { background: rgba(16,185,129,0.15); color: var(--success); border-color: rgba(16,185,129,0.3); }
+
+/* Log entries inside modals */
+.log-entry {
+    padding: 8px 12px; background: rgba(0,0,0,0.25); border-radius: 8px;
+    border: 1px solid var(--glass-border); display: flex;
+    flex-direction: column; gap: 2px;
+    border-left-width: 3px !important;
+}
+.log-name { font-size: 0.82rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.log-meta { font-size: 0.74rem; color: var(--text-secondary); font-family: 'JetBrains Mono', monospace; }
+.log-empty { text-align: center; color: var(--text-secondary); font-size: 0.85rem; padding: 1rem; opacity: 0.6; }
 
 /* -------- ANALYSIS GRID -------- */
 .analysis-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; margin-bottom: 1.5rem; }
@@ -373,3 +384,21 @@ header {
 }
 .modal-log-empty { text-align: center; color: var(--text-secondary); font-size: 0.85rem; padding: 1rem; }
 
+/* =========================
+   FINAL CLICK FIX
+========================= */
+
+#scanner-dropzone {
+    position: relative;
+    z-index: 9999;
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+#scanner-dropzone * {
+    pointer-events: none;
+}
+
+#scanner-dropzone button {
+    pointer-events: auto;
+}

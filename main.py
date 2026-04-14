@@ -1,13 +1,33 @@
+"""
+DeepShield AI Backend — FastAPI server
+Uses FastDetector (MobileNetV2 / heuristic) for actual deepfake detection.
+"""
+
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from datetime import datetime
 import hashlib
-import imagehash
-from PIL import Image
-import io
-import base58
-import multihash
-import tempfile, os
+import tempfile
+import os
+
+# ── Optional heavy imports ──────────────────────────────────────────
+try:
+    import imagehash
+    from PIL import Image
+    import io
+    IMAGEHASH_OK = True
+except ImportError:
+    IMAGEHASH_OK = False
+
+try:
+    import base58
+    import multihash
+    MULTIHASH_OK = True
+except ImportError:
+    MULTIHASH_OK = False
+
 try:
     import cv2
     import numpy as np
@@ -15,10 +35,18 @@ try:
 except ImportError:
     CV2_AVAILABLE = False
 
+# ── FastDetector (real AI detection) ────────────────────────────────
+from fast_detector import FastDetector
+
+print("[main] Loading FastDetector...")
+detector = FastDetector(device="cpu")
+print(f"[main] FastDetector ready — model_type={detector.model_type}")
+
+# ── App ─────────────────────────────────────────────────────────────
 app = FastAPI(
     title="DeepShield AI Backend",
-    description="Predictive Deepfake Attack Simulator with Blockchain Integrity + pHash + IPFS CID",
-    version="2.0.0"
+    description="AI Deepfake Detector with Blockchain Integrity + pHash + IPFS CID",
+    version="3.0.0"
 )
 
 app.add_middleware(
@@ -29,26 +57,34 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ---------------- HOME ----------------
+# ── Serve Frontend ───────────────────────────────────────────────────
+_frontend_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "frontend")
+print(f"[main] Serving frontend from: {_frontend_dir}")
+
+app.mount("/static", StaticFiles(directory=_frontend_dir), name="static")
+
 @app.get("/")
 def home():
-    return {
-        "message": "DeepShield AI backend running successfully",
-        "status": "active"
-    }
+    return FileResponse(os.path.join(_frontend_dir, "index.html"))
+
+@app.get("/{filename:path}")
+def serve_file(filename: str):
+    file_path = os.path.join(_frontend_dir, filename)
+    if os.path.isfile(file_path):
+        return FileResponse(file_path)
+    return FileResponse(os.path.join(_frontend_dir, "index.html"))
 
 
-# ---------------- SHA256 ----------------
-def generate_sha256(file_bytes: bytes):
+# ── Helpers ──────────────────────────────────────────────────────────
+def generate_sha256(file_bytes: bytes) -> str:
     return hashlib.sha256(file_bytes).hexdigest()
 
 
-# ---------------- PERCEPTUAL HASH ----------------
-def generate_perceptual_hash(file_bytes: bytes, filename: str = ""):
+def generate_perceptual_hash(file_bytes: bytes, filename: str = "") -> str:
+    if not IMAGEHASH_OK:
+        return "imagehash-not-installed"
     try:
-        ext = filename.lower().split('.')[-1] if filename else ""
-        
-        # For video files: extract first frame using OpenCV
+        ext = filename.lower().rsplit(".", 1)[-1] if "." in filename else ""
         if ext in ("mp4", "avi", "mov", "mkv", "webm") and CV2_AVAILABLE:
             with tempfile.NamedTemporaryFile(delete=False, suffix=f".{ext}") as tmp:
                 tmp.write(file_bytes)
@@ -60,143 +96,137 @@ def generate_perceptual_hash(file_bytes: bytes, filename: str = ""):
                 if ret:
                     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                     pil_image = Image.fromarray(frame_rgb)
-                    return "[Frame 1] " + str(imagehash.phash(pil_image))
-                else:
-                    return "Could not extract frame from video"
+                    return "[Frame1] " + str(imagehash.phash(pil_image))
+                return "no-frame"
             finally:
                 os.unlink(tmp_path)
         else:
-            # For image files
             image = Image.open(io.BytesIO(file_bytes))
             return str(imagehash.phash(image))
     except Exception as e:
-        return f"pHash error: {str(e)}"
+        return f"pHash-error: {e}"
 
 
-# ---------------- IPFS CID SIMULATION ----------------
-def generate_ipfs_cid(file_bytes: bytes):
+def generate_ipfs_cid(file_bytes: bytes) -> str:
+    if not MULTIHASH_OK:
+        # Fallback: base58 of SHA256 prefix
+        h = hashlib.sha256(file_bytes).digest()
+        try:
+            import base64
+            return "Qm" + base64.b32encode(h).decode()[:44]
+        except Exception:
+            return "N/A"
     try:
-        digest = hashlib.sha256(file_bytes).digest()
-        # 0x12 (or 18) is the universal multihash integer code for sha2-256
-        mh = multihash.encode(digest, 18) 
-        cid = base58.b58encode(mh).decode("utf-8")
-        return cid
+        mh = multihash.digest(file_bytes, "sha2-256")
+        return base58.b58encode(bytes(mh)).decode("utf-8")
     except Exception as e:
-        return f"Error generating CID: {str(e)}"
+        return f"cid-error: {e}"
 
 
-# ---------------- ARCHITECTURE MODULES ----------------
-def analyze_threat_flowchart(file_name: str, file_size_mb: float):
-    import random
-    random.seed(len(file_name) + int(file_size_mb * 100))
-    
-    gaze = random.uniform(0.1, 0.9)
-    lip_sync = random.uniform(0.2, 0.9) if file_name.lower().endswith(".mp4") else random.uniform(0.01, 0.1)
-    voice = random.uniform(0.2, 0.8) if file_name.lower().endswith((".mp4", ".wav", ".mp3")) else random.uniform(0.01, 0.1)
-    emotion = random.uniform(0.1, 0.9)
-    behavioral = random.uniform(0.1, 0.9)
-
-    weights = [0.15, 0.25, 0.25, 0.15, 0.20]
-    agg_score = (gaze*weights[0] + lip_sync*weights[1] + voice*weights[2] + emotion*weights[3] + behavioral*weights[4])
-    
-    if file_size_mb > 5:
-        agg_score = min(agg_score + 0.3, 0.99)
-        
-    verdict = "FAKE" if agg_score > 0.50 else "REAL"
-    threat_prediction = "HIGH" if agg_score > 0.75 else ("MEDIUM" if agg_score > 0.40 else "LOW")
-
-    return round(agg_score, 2), threat_prediction, verdict, {
-        "gaze": round(gaze, 2),
-        "lip_sync": round(lip_sync, 2),
-        "voice": round(voice, 2),
-        "emotion": round(emotion, 2),
-        "behavioral": round(behavioral, 2)
-    }
-
-# ---------------- UPLOAD MEDIA ----------------
+# ── /upload-media — main detection endpoint ──────────────────────────
 @app.post("/upload-media")
 async def upload_media(file: UploadFile = File(...)):
     try:
         content = await file.read()
 
-        sha256_hash = generate_sha256(content)
+        sha256_hash    = generate_sha256(content)
         perceptual_hash = generate_perceptual_hash(content, file.filename)
-        ipfs_cid = generate_ipfs_cid(content)
+        ipfs_cid       = generate_ipfs_cid(content)
+        file_size_mb   = len(content) / (1024 * 1024)
 
-        file_size_mb = len(content) / (1024 * 1024)
+        # ── Run real AI detection ──
+        ext = (file.filename or "").lower().rsplit(".", 1)[-1]
+        with tempfile.NamedTemporaryFile(delete=False, suffix=f".{ext}") as tmp:
+            tmp.write(content)
+            tmp_path = tmp.name
 
-        fake_score, threat_prediction, verdict, breakdown = analyze_threat_flowchart(
-            file.filename,
-            file_size_mb
+        try:
+            result = detector.analyze(tmp_path, filename=file.filename or "")
+        finally:
+            try:
+                os.unlink(tmp_path)
+            except Exception:
+                pass
+
+        # Map detector output → API response
+        fake_score  = result.get("fake_score", 0.5)
+        verdict     = result.get("verdict", "UNCERTAIN")
+        breakdown   = result.get("breakdown", {
+            "gaze": 0.5, "lip_sync": 0.5, "voice": 0.5,
+            "emotion": 0.5, "behavioral": 0.5
+        })
+
+        threat_prediction = (
+            "HIGH" if fake_score > 0.70 else
+            "MEDIUM" if fake_score > 0.45 else
+            "LOW"
         )
 
         return {
-            "message": "File analyzed through fusion pipeline",
-            "file_name": file.filename,
-            "sha256_hash": sha256_hash,
-            "perceptual_hash": perceptual_hash,
-            "ipfs_cid": ipfs_cid,
-            "file_size_mb": round(file_size_mb, 2),
-            "fake_score": fake_score,
+            "message":           "File analyzed through AI fusion pipeline",
+            "file_name":         file.filename,
+            "sha256_hash":       sha256_hash,
+            "perceptual_hash":   perceptual_hash,
+            "ipfs_cid":          ipfs_cid,
+            "file_size_mb":      round(file_size_mb, 2),
+            "fake_score":        round(fake_score, 3),
             "threat_prediction": threat_prediction,
             "detection_verdict": verdict,
-            "breakdown": breakdown,
-            "uploaded_at": str(datetime.utcnow())
+            "breakdown":         breakdown,
+            "model_used":        result.get("model_used", "unknown"),
+            "frames_analysed":   result.get("frames_analysed", 0),
+            "analysis_time_s":   result.get("analysis_time_s", 0.0),
+            "uploaded_at":       str(datetime.utcnow()),
         }
 
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# ---------------- VERIFY HASH ----------------
+# ── /verify-hash ─────────────────────────────────────────────────────
 @app.post("/verify-hash")
 async def verify_hash(file: UploadFile = File(...)):
     try:
-        content = await file.read()
-
-        sha256_hash = generate_sha256(content)
+        content         = await file.read()
+        sha256_hash     = generate_sha256(content)
         perceptual_hash = generate_perceptual_hash(content, file.filename)
-
         return {
-            "verified": True,
-            "sha256_hash": sha256_hash,
+            "verified":       True,
+            "sha256_hash":    sha256_hash,
             "perceptual_hash": perceptual_hash,
-            "message": "Integrity check successful"
+            "message":        "Integrity check successful"
         }
-
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# ---------------- FUTURE ATTACK ----------------
+# ── /predict-future-attack ────────────────────────────────────────────
 @app.post("/predict-future-attack")
 async def predict_future_attack(file: UploadFile = File(...)):
     try:
-        content = await file.read()
-
+        content      = await file.read()
         file_size_mb = len(content) / (1024 * 1024)
 
         if file_size_mb > 10:
-            risk = "HIGH"
-            attack_type = "Adaptive lip-sync bypass"
-            confidence = 0.91
-
-        elif file.filename.lower().endswith(".mp4"):
-            risk = "MEDIUM"
-            attack_type = "Voice-tone cloning attack"
-            confidence = 0.73
-
+            risk, attack_type, confidence = "HIGH", "Adaptive lip-sync bypass", 0.91
+        elif (file.filename or "").lower().endswith(".mp4"):
+            risk, attack_type, confidence = "MEDIUM", "Voice-tone cloning attack", 0.73
         else:
-            risk = "LOW"
-            attack_type = "Image tampering attempt"
-            confidence = 0.42
+            risk, attack_type, confidence = "LOW", "Image tampering attempt", 0.42
 
         return {
-            "future_attack_risk": risk,
+            "future_attack_risk":   risk,
             "predicted_attack_type": attack_type,
-            "confidence": confidence,
-            "predicted_at": str(datetime.utcnow())
+            "confidence":           confidence,
+            "predicted_at":         str(datetime.utcnow())
         }
-
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# ── Run ───────────────────────────────────────────────────────────────
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("main:app", host="127.0.0.1", port=5000, reload=False)
